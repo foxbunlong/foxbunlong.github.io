@@ -3,11 +3,11 @@ import { onMounted } from 'vue'
 
 onMounted(() => {
   let html2pdfScript = document.createElement('script')
-  html2pdfScript.setAttribute('src', 'src/assets/js/html2pdf.bundle.min.js')
+  html2pdfScript.setAttribute('src', '/src/assets/js/html2pdf.bundle.min.js')
   document.head.appendChild(html2pdfScript)
 
   let oldMainScript = document.createElement('script')
-  oldMainScript.setAttribute('src', 'src/assets/js/main.js')
+  oldMainScript.setAttribute('src', '/src/assets/js/main.js')
   document.head.appendChild(oldMainScript)
 })
 </script>
@@ -71,13 +71,13 @@ onMounted(() => {
         <section class="home" id="home">
           <div class="home__container section bd-grid">
             <div class="home__data bd-grid">
-              <img src="src/assets/img/long_thay.jpg" alt="" class="home__img" />
+              <img src="/src/assets/img/long_thay.jpg" alt="" class="home__img" />
 
               <h1 class="home__title">Long <b>Thay</b></h1>
               <h3 class="home__profession">Fullstack Developer</h3>
 
               <div>
-                <a download="" href="src/assets/pdf/longthaycv.pdf" class="home__button-movil"
+                <a download="" href="/src/assets/pdf/longthaycv.pdf" class="home__button-movil"
                   >Download CV</a
                 >
               </div>
