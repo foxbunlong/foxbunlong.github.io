@@ -4,13 +4,24 @@ import { ref as dbRef, getDatabase } from 'firebase/database'
 import { firebaseApp } from './firebase'
 import { useDatabaseList, useDatabaseObject } from 'vuefire'
 
+interface FirebaseDataModel {
+  $value: string
+  link: string
+  alias: string
+  position: string
+  period: string
+  description: string
+  name: string
+  academy: string
+}
+
 const db = getDatabase(firebaseApp)
-const personalData = useDatabaseList(dbRef(db, 'personal'))
-const socialData = useDatabaseList(dbRef(db, 'social'))
-const profileData = useDatabaseObject(dbRef(db, 'profile'))
-const skillsData = useDatabaseList(dbRef(db, 'skills'))
-const experienceData = useDatabaseList(dbRef(db, 'experience'))
-const educationData = useDatabaseList(dbRef(db, 'education'))
+const personalData = useDatabaseList<FirebaseDataModel>(dbRef(db, 'personal'))
+const socialData = useDatabaseList<FirebaseDataModel>(dbRef(db, 'social'))
+const profileData = useDatabaseObject<FirebaseDataModel>(dbRef(db, 'profile'))
+const skillsData = useDatabaseList<FirebaseDataModel>(dbRef(db, 'skills'))
+const experienceData = useDatabaseList<FirebaseDataModel>(dbRef(db, 'experience'))
+const educationData = useDatabaseList<FirebaseDataModel>(dbRef(db, 'education'))
 
 onMounted(() => {
   let html2pdfScript = document.createElement('script')
