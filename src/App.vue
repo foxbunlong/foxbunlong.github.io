@@ -1,5 +1,16 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
+import { ref as dbRef, getDatabase } from 'firebase/database'
+import { firebaseApp } from './firebase'
+import { useDatabaseList, useDatabaseObject } from 'vuefire'
+
+const db = getDatabase(firebaseApp)
+const personalData = useDatabaseList(dbRef(db, 'personal'))
+const socialData = useDatabaseList(dbRef(db, 'social'))
+const profileData = useDatabaseObject(dbRef(db, 'profile'))
+const skillsData = useDatabaseList(dbRef(db, 'skills'))
+const experienceData = useDatabaseList(dbRef(db, 'experience'))
+const educationData = useDatabaseList(dbRef(db, 'education'))
 
 onMounted(() => {
   let html2pdfScript = document.createElement('script')
@@ -73,8 +84,10 @@ onMounted(() => {
             <div class="home__data bd-grid">
               <img src="/src/assets/img/long_thay.jpg" alt="" class="home__img" />
 
-              <h1 class="home__title">Long <b>Thay</b></h1>
-              <h3 class="home__profession">Fullstack Developer</h3>
+              <h1 class="home__title">{{ personalData.find((e) => e.id === 'name')?.$value }}</h1>
+              <h3 class="home__profession">
+                {{ personalData.find((e) => e.id === 'position')?.$value }}
+              </h3>
 
               <div>
                 <a download="" href="/src/assets/pdf/longthaycv.pdf" class="home__button-movil"
@@ -82,16 +95,18 @@ onMounted(() => {
                 >
               </div>
             </div>
-
             <div class="home__address bd-grid">
               <span class="home__information">
-                <i class="bx bx-map home__icon"></i> HCMC, Vietnam
+                <i class="bx bx-map home__icon"></i>
+                {{ personalData.find((e) => e.id === 'address')?.$value }}
               </span>
               <span class="home__information">
-                <i class="bx bx-envelope home__icon"></i> thaybunlong20@gmail.com
+                <i class="bx bx-envelope home__icon"></i>
+                {{ personalData.find((e) => e.id === 'email')?.$value }}
               </span>
               <span class="home__information">
-                <i class="bx bx-phone home__icon"></i> +84-988-997-071
+                <i class="bx bx-phone home__icon"></i>
+                {{ personalData.find((e) => e.id === 'phone')?.$value }}
               </span>
             </div>
           </div>
@@ -107,14 +122,29 @@ onMounted(() => {
           <h2 class="section-title">SOCIAL</h2>
 
           <div class="social__container bd-grid">
-            <a href="https://www.linkedin.com/in/thaybunlong/" target="_blank" class="social_link">
-              <i class="bx bxl-linkedin-square social__icon"></i> @thaybunlong
+            <a
+              :href="socialData.find((e) => e.id === 'linkedin')?.link"
+              target="_blank"
+              class="social_link"
+            >
+              <i class="bx bxl-linkedin-square social__icon"></i>
+              {{ socialData.find((e) => e.id === 'linkedin')?.alias }}
             </a>
-            <a href="https://www.facebook.com/thaybunlong/" target="_blank" class="social_link">
-              <i class="bx bxl-facebook social__icon"></i> @thaybunlong
+            <a
+              :href="socialData.find((e) => e.id === 'facebook')?.link"
+              target="_blank"
+              class="social_link"
+            >
+              <i class="bx bxl-facebook social__icon"></i>
+              {{ socialData.find((e) => e.id === 'facebook')?.alias }}
             </a>
-            <a href="https://github.com/foxbunlong" target="_blank" class="social_link">
-              <i class="bx bxl-github social__icon"></i> @foxbunlong
+            <a
+              :href="socialData.find((e) => e.id === 'github')?.link"
+              target="_blank"
+              class="social_link"
+            >
+              <i class="bx bxl-github social__icon"></i>
+              {{ socialData.find((e) => e.id === 'github')?.alias }}
             </a>
           </div>
         </section>
@@ -123,11 +153,7 @@ onMounted(() => {
         <section class="profile section" id="profile">
           <h2 class="section-title">Profile</h2>
 
-          <p class="profile__description">
-            <b>Professional Experience:</b> Mobile app engineer (Android and iOS), system architect
-            and database analyst.<br /><b>Specialties:</b> Mobile apps, Server Architecture,
-            Networking, Database Organizing, Dataflow designing and managing
-          </p>
+          <p class="profile__description" v-html="profileData?.$value"></p>
         </section>
 
         <!--========== SKILLS  ==========-->
@@ -136,15 +162,9 @@ onMounted(() => {
 
           <div class="skills__content bd-grid">
             <ul class="skills__data">
-              <li class="skills__name"><span class="skills__circle"></span> Android</li>
-              <li class="skills__name"><span class="skills__circle"></span> Flutter</li>
-              <li class="skills__name"><span class="skills__circle"></span> iOS</li>
-            </ul>
-
-            <ul class="skills__data">
-              <li class="skills__name"><span class="skills__circle"></span> Web</li>
-              <li class="skills__name"><span class="skills__circle"></span> Backend</li>
-              <li class="skills__name"><span class="skills__circle"></span> Devops</li>
+              <li class="skills__name" v-for="skill in skillsData" :key="skill.id">
+                <span class="skills__circle"></span> {{ skill.$value }}
+              </li>
             </ul>
           </div>
         </section>
@@ -156,69 +176,24 @@ onMounted(() => {
           <h2 class="section-title">Experience</h2>
 
           <div class="experience__container bd-grid">
-            <div class="experience__content">
+            <div
+              class="experience__content"
+              v-for="experience in experienceData"
+              :key="experience.id"
+            >
               <div class="experience__time">
                 <span class="experience__rounder"></span>
-                <span class="experience__line"></span>
+                <span
+                  class="experience__line"
+                  v-if="+experience.id < experienceData.length - 1"
+                ></span>
               </div>
 
               <div class="experience__data bd-grid">
-                <h3 class="experience__title">FULLSTACK DEVELOPER</h3>
-                <span class="experience__company">Jul 2023 - Present | Pollen.tech</span>
+                <h3 class="experience__title">{{ experience.position }}</h3>
+                <span class="experience__company">{{ experience.period }}</span>
                 <p class="experience__description">
-                  Work as fullstack developer for private B2B liquidation platform, ensure
-                  application's stability and improve user experience.
-                </p>
-              </div>
-            </div>
-            <div class="experience__content">
-              <div class="experience__time">
-                <span class="experience__rounder"></span>
-                <span class="experience__line"></span>
-              </div>
-
-              <div class="experience__data bd-grid">
-                <h3 class="experience__title">FULLSTACK DEVELOPER</h3>
-                <span class="experience__company"
-                  >Jun 2022 - Mar 2023 | Phu My Hung Development Corporation</span
-                >
-                <p class="experience__description">
-                  Work as fullstack developer to develop mobile app and back office for Livin Phu My
-                  Hung app.
-                </p>
-              </div>
-            </div>
-            <div class="experience__content">
-              <div class="experience__time">
-                <span class="experience__rounder"></span>
-                <span class="experience__line"></span>
-              </div>
-
-              <div class="experience__data bd-grid">
-                <h3 class="experience__title">SENIOR MOBILE ENGINEER</h3>
-                <span class="experience__company">Nov 2021 - Apr 2022 | Neo Consulting</span>
-                <p class="experience__description">
-                  Work as Android developer to develop native Android app for a Chinese agency in
-                  entertainment industry.
-                </p>
-              </div>
-            </div>
-            <div class="experience__content">
-              <div class="experience__time">
-                <span class="experience__rounder"></span>
-                <!-- <span class="experience__line"></span> -->
-              </div>
-
-              <div class="experience__data bd-grid">
-                <h3 class="experience__title">SENIOR MOBILE ENGINEER</h3>
-                <span class="experience__company">Aug 2016 - May 2021 | Concung.com</span>
-                <p class="experience__description">
-                  Android Mobile development for internal ERP system - Build music app (BedTime app)
-                  - Build e-commerce Android app (Concung app) - Build Android internal ERP app -
-                  Guide team member to build iOS Native app - Support backend team to build and
-                  maintain api - Guarantee the highest quality app used by thousands of users at the
-                  same time - Support different version of Android from Android 4.x+ - Deploy NodeJS
-                  and Socket IO for social network module
+                  {{ experience.description }}
                 </p>
               </div>
             </div>
@@ -230,55 +205,19 @@ onMounted(() => {
           <h2 class="section-title">Education</h2>
 
           <div class="education__container bd-grid">
-            <div class="education__content">
+            <div class="education__content" v-for="education in educationData" :key="education.id">
               <div class="education__time">
                 <span class="education__rounder"></span>
-                <span class="education__line"></span>
+                <span
+                  class="education__line"
+                  v-if="+education.id < educationData.length - 1"
+                ></span>
               </div>
 
               <div class="education__data bd-grid">
-                <h3 class="education__title">Many courses related to skill developments</h3>
-                <span class="education__studies">Udemy</span>
-                <span class="education__year">2015 - Present</span>
-              </div>
-            </div>
-
-            <div class="education__content">
-              <div class="education__time">
-                <span class="education__rounder"></span>
-                <span class="education__line"></span>
-              </div>
-
-              <div class="education__data bd-grid">
-                <h3 class="education__title">iOS Development</h3>
-                <span class="education__studies">IT Center - University of Science</span>
-                <span class="education__year">2015</span>
-              </div>
-            </div>
-
-            <div class="education__content">
-              <div class="education__time">
-                <span class="education__rounder"></span>
-                <span class="education__line"></span>
-              </div>
-
-              <div class="education__data bd-grid">
-                <h3 class="education__title">CCNA Certificate</h3>
-                <span class="education__studies">SaigonCTT</span>
-                <span class="education__year">2011 - 2012</span>
-              </div>
-            </div>
-
-            <div class="education__content">
-              <div class="education__time">
-                <span class="education__rounder"></span>
-                <!-- <span class="education__line"></span> -->
-              </div>
-
-              <div class="education__data bd-grid">
-                <h3 class="education__title">BACHELOR OF BUSINESS, BUSINESS INFORMATION SYSTEMS</h3>
-                <span class="education__studies">RMIT Vietnam University</span>
-                <span class="education__year">2008 - 2011</span>
+                <h3 class="education__title">{{ education.name }}</h3>
+                <span class="education__studies">{{ education.academy }}</span>
+                <span class="education__year">{{ education.period }}</span>
               </div>
             </div>
           </div>
@@ -778,11 +717,17 @@ img {
 
 /*========== SKILLS AND LANGUAGES ==========*/
 .skills__content {
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(1, 1fr);
 }
 
 .skills__content {
   gap: 0;
+}
+
+.skills__data {
+  columns: 2;
+  -webkit-columns: 2;
+  -moz-columns: 2;
 }
 
 .skills__name {
