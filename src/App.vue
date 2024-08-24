@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
-import { ref as dbRef, getDatabase } from 'firebase/database'
+import { onMounted, ref } from 'vue'
+import { ref as dbRef, getDatabase, query, get, orderByChild } from 'firebase/database'
 import { firebaseApp } from './firebase'
 import { useDatabaseList, useDatabaseObject } from 'vuefire'
 
@@ -20,7 +20,14 @@ const personalData = useDatabaseList<FirebaseDataModel>(dbRef(db, 'personal'))
 const socialData = useDatabaseList<FirebaseDataModel>(dbRef(db, 'social'))
 const profileData = useDatabaseObject<FirebaseDataModel>(dbRef(db, 'profile'))
 const skillsData = useDatabaseList<FirebaseDataModel>(dbRef(db, 'skills'))
-const experienceData = useDatabaseList<FirebaseDataModel>(dbRef(db, 'experience'))
+let experienceData = ref<any>([])
+const experienceDataQuery = query(dbRef(db, 'experience'), orderByChild('_id'))
+get(experienceDataQuery).then((snapshot) => {
+  snapshot.forEach(function (child) {
+    experienceData.value.push(child.val())
+  })
+})
+
 const educationData = useDatabaseList<FirebaseDataModel>(dbRef(db, 'education'))
 
 onMounted(() => {
@@ -190,13 +197,13 @@ onMounted(() => {
             <div
               class="experience__content"
               v-for="experience in experienceData"
-              :key="experience.id"
+              :key="experience._id"
             >
               <div class="experience__time">
                 <span class="experience__rounder"></span>
                 <span
                   class="experience__line"
-                  v-if="+experience.id < experienceData.length - 1"
+                  v-if="+experience._id < experienceData.length"
                 ></span>
               </div>
 
